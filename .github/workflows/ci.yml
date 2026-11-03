@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  testes:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python: ["3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Testar
+        run: python -m unittest discover -s testes -t . -v
+
+      - name: Recalcular as tabelas do README
+        run: python -m ferramentas.medidor
+
+  ate_quinze_digitos:
+    # Onde aparece o recordista mundial, 277777788888899. O job confere que ele
+    # continua sendo o menor com persistencia 11, e FALHA se aparecer um 12 —
+    # que seria noticia de verdade.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Varredura ate quinze digitos
+        run: python -m ferramentas.medidor --completo
